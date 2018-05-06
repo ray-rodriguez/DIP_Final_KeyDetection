@@ -13,6 +13,8 @@ import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.stage.WindowEvent;
+import DatabaseManagement.DatabaseCommunication;
+import java.sql.SQLException;
 
 /**
  *
@@ -20,7 +22,9 @@ import javafx.stage.WindowEvent;
  */
 public class DIP_FaceRecog_JavaFXMainApp extends Application {
     @Override
-    public void start(Stage primaryStage) { 
+    public void start(Stage primaryStage) throws SQLException{ 
+        DatabaseCommunication dbCom = new DatabaseCommunication();
+        dbCom.DBConnect();
         // Initialize the Camera/Opencv Lib
         System.loadLibrary("opencv_java341");
         FrameGrabber frameGrabber = new FrameGrabber();

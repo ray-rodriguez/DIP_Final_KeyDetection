@@ -8,8 +8,14 @@
   </information>
   <resources>
     <j2se version="1.6+" java-vm-args=""-Djava.library.path="C:\opencv\build\java\x64"" "  href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="ImageCapture.jar" size="340090" download="eager" />
+    <jar href="ImageCapture.jar" size="347752" download="eager" />
+    <jar href="lib\c3p0-0.9.1-pre6.jar" size="531005" download="eager" />
+    <jar href="lib\jboss-common-jdbc-wrapper-src.jar" size="35342" download="eager" />
+    <jar href="lib\jboss-common-jdbc-wrapper.jar" size="50184" download="eager" />
+    <jar href="lib\mysql-connector-java-8.0.11.jar" size="2036609" download="eager" />
     <jar href="lib\opencv-341.jar" size="423917" download="eager" />
+    <jar href="lib\protobuf-java-2.6.0.jar" size="593799" download="eager" />
+    <jar href="lib\slf4j-api-1.6.1.jar" size="25496" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="ImageCapture" >
     <param name="requiredFXVersion" value="8.0+"/>
