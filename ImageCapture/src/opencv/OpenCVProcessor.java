@@ -70,15 +70,16 @@ public class OpenCVProcessor {
         return destination;
     }
 
+    // not done yet!
     public static Mat doMoments(Mat source) {
         Moments mm = Imgproc.moments(source, true);
         mm.get_m00();
-        mm.get_m00();
-        mm.get_m00();
-        mm.get_m00();
+        mm.get_m01();
+        //mm.many others....
         return source;
     }
 
+    // just for getting contours....
     public static MatOfPoint doContour(Mat source) {
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -138,6 +139,7 @@ public class OpenCVProcessor {
         return maxContour;
     }
 
+    //Nice to know but not used for deatures....
     public static Mat doFDDescriptorsComplexCoord(Mat originalImage) {
         
         // get max contour:
@@ -151,13 +153,13 @@ public class OpenCVProcessor {
 
         //Normalized length
         Complex[] complextData = normalizedSizeToBackward(complextData2, 512);
+        
         for (int i = 0; i < 10; i++) {
             System.out.println("original data: " + complextData[i].toString());
         }
 
         //Extract Average
-        float XCentroid = 0;
-        float YCentroid = 0;
+        float XCentroid = 0; float YCentroid = 0;
         for (Complex complextData1 : complextData) {
             XCentroid += complextData1.re();
             YCentroid += complextData1.im();
@@ -188,13 +190,72 @@ public class OpenCVProcessor {
         }
 
         MatOfPoint recoveredContour = convertPointArray2MatOfPoint(points2);
-
         Mat FDReconstructedImg = drawContourMat(recoveredContour, originalImage);
-
         return FDReconstructedImg;
     }
+    
+    public static double[] doFDDescriptorsComplexDistance(Mat originalImage, int noOfFeaturesToRetain)
+    {
+        // get max contour:
+        MatOfPoint matOfPoint = doContour(originalImage);
 
-    public static Mat doFDDescriptorsComplexDistance(Mat originalImage) {
+        //convert to array of Points
+        Point[] points = matOfPoint.toArray();
+
+        // start FFT
+        Complex[] complextData2 = convertPointArray2ComplexArray(points);
+
+        //Normalized length
+        Complex[] complextData = normalizedSizeToBackward(complextData2, 512);
+        
+        //For radial distance
+        Complex[] distanceData = new Complex[complextData.length];
+
+        //Extract Average
+        float XCentroid = 0;
+        float YCentroid = 0;
+        for (Complex complextData1 : complextData) {
+            XCentroid += complextData1.re();
+            YCentroid += complextData1.im();
+        }
+        XCentroid /= complextData.length;
+        YCentroid /= complextData.length;
+        // System.out.println("Original data Centroids " + XCentroid + "  "+ YCentroid);
+
+        // find index of max distance
+        int maxIndex =0;
+        double maxDistance=0;
+        for (int i = 0; i < complextData.length; i++) 
+        {
+            double distance= Math.sqrt( Math.pow((complextData[i].re() - XCentroid),2.00)+ Math.pow((complextData[i].im() - YCentroid),2.00));
+            distanceData  [i] = new Complex(distance,0);
+            if(distance > maxDistance)
+            {
+                 maxIndex =i;
+                 maxDistance=distance;
+            } 
+        }
+        
+        //Rotate to the max radius point
+        Complex[] distanceRotationNormalized = new Complex[distanceData.length];
+        for (int i = maxIndex; i < maxIndex+ distanceData.length; i++) 
+        {
+            distanceRotationNormalized[i- maxIndex] = distanceData[i% distanceData.length];
+        }
+        
+        //fft  
+        Complex[] fftData = doFFT(distanceRotationNormalized);
+           
+       // Normalize by dividing by the first coeff.
+        double[] features = new double[noOfFeaturesToRetain];
+        for (int i = 0; i < noOfFeaturesToRetain; i++) 
+        {
+                features[i] = fftData[i].abs()/fftData[0].abs();
+        }
+        return features;
+    }
+    public static Mat doFDDescriptorsComplexDistanceReconstruction(Mat originalImage, int noOfFeaturesToRetain)
+    {
 
         // get max contour:
         MatOfPoint matOfPoint = doContour(originalImage);
@@ -212,10 +273,12 @@ public class OpenCVProcessor {
         Complex[] distanceData = new Complex[complextData.length];
         
         // For angles
-        double[] distanceAngle1 = new double[complextData.length];
-        double[] distanceAngle2 = new double[complextData.length];
+        double[] distanceAngle1  = new double[complextData.length];
+        double[] distanceAngle1N = new double[complextData.length];
+        double[] distanceAngle2  = new double[complextData.length];
+        double[] distanceAngle2N = new double[complextData.length];
         for (int i = 0; i < 10; i++) {
-            System.out.println("Original data: " + complextData[i].toString());
+            System.out.println("1st 10 Original data: " + complextData[i].toString());
         }
 
         //Extract Average
@@ -227,7 +290,7 @@ public class OpenCVProcessor {
         }
         XCentroid /= complextData.length;
         YCentroid /= complextData.length;
-       System.out.println("Original data Centroid " + XCentroid + "  "+ YCentroid);
+       System.out.println("Original data Centroids " + XCentroid + "  "+ YCentroid);
 
         // find index of max distance
         int maxIndex =0;
@@ -236,7 +299,9 @@ public class OpenCVProcessor {
         {
             double distance= Math.sqrt( Math.pow((complextData[i].re() - XCentroid),2.00)+
                        Math.pow((complextData[i].im() - YCentroid),2.00));
-            distanceData[i] = new Complex(distance,0);
+            distanceData  [i] = new Complex(distance,0);
+            distanceAngle1[i] = Math.acos((complextData[i].re() - XCentroid)/distanceData[i].re());
+            distanceAngle2[i] = Math.asin((complextData[i].im() - YCentroid)/distanceData[i].re());
             if(distance > maxDistance)
             {
                  maxIndex =i;
@@ -244,60 +309,69 @@ public class OpenCVProcessor {
             } 
         }
         
-        //Rotate to the max radius
+        //Rotate to the max radius point
         Complex[] distanceRotationNormalized = new Complex[distanceData.length];
         for (int i = maxIndex; i < maxIndex+ distanceData.length; i++) 
         {
-            double distance= Math.sqrt( Math.pow((complextData[i-maxIndex].re() - XCentroid),2.00)+
-                       Math.pow((complextData[i-maxIndex].im() - YCentroid),2.00));
-            
             distanceRotationNormalized[i- maxIndex] = distanceData[i% distanceData.length];
-            distanceAngle1[i- maxIndex] = Math.acos((complextData[i-maxIndex].re() - XCentroid)/distance);
-            distanceAngle2[i- maxIndex] = Math.asin((complextData[i-maxIndex].im() - YCentroid)/distance);
+            distanceAngle1N[i- maxIndex] = distanceAngle1[i% distanceData.length];
+            distanceAngle2N[i- maxIndex] = distanceAngle2[i% distanceData.length];
         }
         
         //fft  
         Complex[] fftData = doFFT(distanceRotationNormalized);
-
+        
+        //Keep some not all
+        Complex[] fftDataRetained = new Complex[fftData.length];
+        for (int i = 0; i < fftData.length; i++) 
+        {
+            if(i <noOfFeaturesToRetain)
+                fftDataRetained[i] = fftData[i];
+            else
+                fftDataRetained[i] = new Complex(0,0);
+        }
+           
+       // Normalize by dividing by the first coeff.
+       // Restore Means & rotation
+        double[] features = new double[noOfFeaturesToRetain];
+        for (int i = 0; i < noOfFeaturesToRetain; i++) 
+        {
+                features[i] = fftData[i].abs()/fftData[0].abs();
+        }
+        // Done with the features
+        
+        
+        // Extra:
+        // Check for reconstruction
         // Inverse FFT
-        Complex[] complextDataRecovered = doIFFT(fftData);
+        Complex[] complextDataRecovered = doIFFT(fftDataRetained);
 
         //Restore Means & rotation
         for (int i = 0; i < complextDataRecovered.length; i++) 
         {
-            double complextDataRecovered_x = Math.abs(complextDataRecovered[i].re())* Math.cos(distanceAngle1[i])+XCentroid;
-            double complextDataRecovered_y = Math.abs(complextDataRecovered[i].re())* Math.sin(distanceAngle2[i])+YCentroid;
-            complextDataRecovered[i] = new Complex(complextDataRecovered_x,Math.abs(complextDataRecovered_y) );
-        }
-
-        for (int i = 0; i < 10; i++) {
-            System.out.println("original data recovered: " + complextDataRecovered[i].toString());
+            double complextDataRecovered_x = (complextDataRecovered[i].scale(Math.cos(distanceAngle1N[i]))).re()+XCentroid;
+            double complextDataRecovered_y = (complextDataRecovered[i].scale(Math.sin(distanceAngle2N[i]))).re()+YCentroid;
+            complextDataRecovered[i] = new Complex(Math.abs(complextDataRecovered_x),Math.abs(complextDataRecovered_y) );
         }
 
         Point[] points2 = convertComplexArray2PointArray(complextDataRecovered);
-        for (int i = 0; i < 10; i++) {
-            System.out.println("original data recovered points: " + points2[i].toString());
-        }
-
         MatOfPoint recoveredContour = convertPointArray2MatOfPoint(points2);
-
-        Mat FDReconstructedImg = drawContourMat(recoveredContour, originalImage);
-
+        Mat FDReconstructedImg      = drawContourMat(recoveredContour, originalImage);
         return FDReconstructedImg;
     }
 
     /*
-This method accepts the following parameters −
-src − An object of the class Mat representing the source (input) image.
-dst − An object of the class Mat representing the destination (output) image.
-maxValue − A variable of double type representing the value that is to be given if pixel value is more than the threshold value.
-adaptiveMethod − A variable of integer the type representing the adaptive method to be used. This will be either of the following two values
-ADAPTIVE_THRESH_MEAN_C − threshold value is the mean of neighborhood area.
-ADAPTIVE_THRESH_GAUSSIAN_C − threshold value is the weighted sum of neighborhood values where weights are a Gaussian window.
-thresholdType − A variable of integer type representing the type of threshold to be used.
-blockSize − A variable of the integer type representing size of the pixelneighborhood used to calculate the threshold value.
-C − A variable of double type representing the constant used in the both methods (subtracted from the mean or weighted mean).
-     */
+    This method accepts the following parameters −
+    src − An object of the class Mat representing the source (input) image.
+    dst − An object of the class Mat representing the destination (output) image.
+    maxValue − A variable of double type representing the value that is to be given if pixel value is more than the threshold value.
+    adaptiveMethod − A variable of integer the type representing the adaptive method to be used. This will be either of the following two values
+    ADAPTIVE_THRESH_MEAN_C − threshold value is the mean of neighborhood area.
+    ADAPTIVE_THRESH_GAUSSIAN_C − threshold value is the weighted sum of neighborhood values where weights are a Gaussian window.
+    thresholdType − A variable of integer type representing the type of threshold to be used.
+    blockSize − A variable of the integer type representing size of the pixelneighborhood used to calculate the threshold value.
+    C − A variable of double type representing the constant used in the both methods (subtracted from the mean or weighted mean).
+         */
     public static Mat doAdaptiveThreshold(Mat src, int blockSize, double C) {
         // Creating an empty matrix to store the result
         Mat dest = new Mat(src.rows(), src.cols(), src.type());
@@ -306,8 +380,16 @@ C − A variable of double type representing the constant used in the both metho
         Imgproc.adaptiveThreshold(src, dest, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, blockSize, C);
         return dest;
     }
+    
+    public static Mat doGrayImage(Mat src) 
+    {
+        // Creating an empty matrix to store the result
+        Mat grayImg = new Mat(src.rows(), src.cols(), CvType.CV_8UC1, new Scalar(0));
+        Imgproc.cvtColor(src, grayImg, Imgproc.COLOR_RGB2GRAY);
+        return grayImg;
+    }
 
-    // basic thresholding
+    // Basic thresholding
     public static Mat doThreshold(Mat src, double th) {
         // Creating an empty matrix to store the result
         Mat dest = new Mat(src.rows(), src.cols(), src.type());
@@ -337,6 +419,7 @@ C − A variable of double type representing the constant used in the both metho
         return dest;
     }
 
+    //
     public static Mat doErode(Mat src, int erosion_size) {
 
         Mat dest = src;
@@ -345,6 +428,7 @@ C − A variable of double type representing the constant used in the both metho
         return dest;
     }
 
+    //
     public static Mat doMorphGrad(Mat src, int size, int type) {
         Mat dest = new Mat(src.rows(), src.cols(), src.type());
         Mat d = src.clone();
@@ -368,11 +452,13 @@ C − A variable of double type representing the constant used in the both metho
         return dest;
     }
 
+    //
     public static Complex[] doFFT(Complex[] data) {
         Complex[] fft = FFT.fft(data);
         return fft;
     }
 
+    //
     public static Complex[] doIFFT(Complex[] fftData) {
         Complex[] data = FFT.ifft(fftData);
         return data;
@@ -411,6 +497,7 @@ C − A variable of double type representing the constant used in the both metho
         return contourImg;
     }
 
+    //
     public static Mat drawContour(MatOfPoint source, boolean drawBoundingRect) {
         Mat contourImg = new Mat(source.rows(), source.cols(), CvType.CV_8UC1, new Scalar(0));
         // Extract features:
@@ -435,6 +522,7 @@ C − A variable of double type representing the constant used in the both metho
         return contourImg;
     }
 
+    //
     public static Complex[] normalizedSizeToForward(Complex[] complextData, int newSize) {
         Complex[] normalizedData = new Complex[newSize];
         float scaleFactor = (float) (newSize - 1) / complextData.length;
@@ -482,5 +570,4 @@ C − A variable of double type representing the constant used in the both metho
         }
         return normalizedData;
     }
-
 }
