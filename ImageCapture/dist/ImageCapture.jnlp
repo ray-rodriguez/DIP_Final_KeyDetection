@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="ImageCapture.jnlp">
+  <information>
+    <title>ImageCapture</title>
+    <vendor>MQ0162246</vendor>
+    <description>null</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="1.6+" java-vm-args=""-Djava.library.path="C:\opencv\build\java\x64"" "  href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="ImageCapture.jar" size="340090" download="eager" />
+    <jar href="lib\opencv-341.jar" size="423917" download="eager" />
+  </resources>
+  <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="ImageCapture" >
+    <param name="requiredFXVersion" value="8.0+"/>
+  </applet-desc>
+  <jfx:javafx-desc  width="800" height="600" main-class="main.DIP_FaceRecog_JavaFXMainApp"  name="ImageCapture" />
+  <update check="always"/>
+</jnlp>
