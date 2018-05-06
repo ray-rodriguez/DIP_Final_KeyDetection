@@ -359,7 +359,6 @@ public class KeyOperations extends BorderPane {
             Image resultImg2 = FXDIPUtils.mat2Image(currentContourMat); 
             contourImageView.setImage(resultImg2);
             
-            // There is an error here...
             // For fun show the reconstructed based on a subset of the total features
             currentReconstructedMat = OpenCVProcessor.doFDDescriptorsComplexDistanceReconstruction(binarylImageMat,50); 
             Image currentReconstructedimage = FXDIPUtils.mat2Image(currentReconstructedMat); 
