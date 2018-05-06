@@ -87,6 +87,7 @@ public class KeyOperations extends BorderPane {
     private ImageView currentReconstructedimageview = new ImageView();
     private Image currentReconstructedimage = null;
     Mat currentReconstructedMat;
+    private Slider reconstructSlider = new Slider(0, 512, 1);
     
     Mat currentImageMat;
     Mat currentContourMat;
@@ -255,6 +256,17 @@ public class KeyOperations extends BorderPane {
         processKeyButton.setMaxWidth(Double.MAX_VALUE);
         processKeyButton.setOnAction(new Operation3Handler());
         
+        //Reconstruct
+        Button reconstructKeyButton = new Button("Reconstruct-OpenCV");
+        reconstructKeyButton.setMaxWidth(Double.MAX_VALUE);
+        reconstructKeyButton.setOnAction(new Operation7Handler());
+        reconstructSlider.setValue(0);
+        reconstructSlider.setShowTickLabels(true);
+        reconstructSlider.setShowTickMarks(true);
+        reconstructSlider.setMajorTickUnit(128);
+        reconstructSlider.setMinorTickCount(16);
+        reconstructSlider.setBlockIncrement(4);
+        
         //Compare Button
         Button compareKeyButton = new Button("Get Features & Compare...");
         compareKeyButton.setMaxWidth(Double.MAX_VALUE);
@@ -268,7 +280,7 @@ public class KeyOperations extends BorderPane {
 
         // Final layout
         VBox vb = new VBox(10);
-        vb.getChildren().addAll(selectKeyButton, grayKeyButton, NegateButton, binarySlider, binarizeKeyButton, processKeyButton, featureSlider, compareKeyButton);
+        vb.getChildren().addAll(selectKeyButton, grayKeyButton, NegateButton, binarySlider, binarizeKeyButton, processKeyButton, reconstructSlider, reconstructKeyButton, featureSlider, compareKeyButton);
 
         dipOperations.getChildren().addAll(vb);
         return dipOperations;
@@ -358,12 +370,6 @@ public class KeyOperations extends BorderPane {
             // Show contour
             Image resultImg2 = FXDIPUtils.mat2Image(currentContourMat); 
             contourImageView.setImage(resultImg2);
-            
-            // For fun show the reconstructed based on a subset of the total features
-            currentReconstructedMat = OpenCVProcessor.doFDDescriptorsComplexDistanceReconstruction(binarylImageMat,50); 
-            Image currentReconstructedimage = FXDIPUtils.mat2Image(currentReconstructedMat); 
-            currentReconstructedimageview.setImage(currentReconstructedimage);
-            
         }        
     }
     
@@ -406,6 +412,18 @@ public class KeyOperations extends BorderPane {
             
             //Compare image with database...
             
+        }
+    }
+    
+    class Operation7Handler implements EventHandler<ActionEvent> {
+        @Override
+        public void handle(ActionEvent event){
+            int value = (int) reconstructSlider.getValue();
+            
+            // For fun show the reconstructed based on a subset of the total features
+            currentReconstructedMat = OpenCVProcessor.doFDDescriptorsComplexDistanceReconstruction(binarylImageMat,value); 
+            Image currentReconstructedimage = FXDIPUtils.mat2Image(currentReconstructedMat); 
+            currentReconstructedimageview.setImage(currentReconstructedimage);
         }
     }
 }
