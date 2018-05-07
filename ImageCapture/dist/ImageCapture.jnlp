@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" java-vm-args=""-Djava.library.path="C:\opencv\build\java\x64"" "  href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="ImageCapture.jar" size="355986" download="eager" />
+    <jar href="ImageCapture.jar" size="356963" download="eager" />
     <jar href="lib\c3p0-0.9.1-pre6.jar" size="531005" download="eager" />
     <jar href="lib\jboss-common-jdbc-wrapper-src.jar" size="35342" download="eager" />
     <jar href="lib\jboss-common-jdbc-wrapper.jar" size="50184" download="eager" />

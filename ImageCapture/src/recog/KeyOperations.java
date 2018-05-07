@@ -9,7 +9,8 @@ import DatabaseManagement.DBQueryObject;
 import DatabaseManagement.DatabaseCommunication;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.sql.SQLException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
@@ -41,6 +42,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
@@ -84,6 +86,12 @@ public class KeyOperations extends BorderPane {
     TextField buildingField;
     TextField officeField;
     TextField nameToUpdateField;
+    
+    ImageView matched;
+    ImageView matchImgV;
+    Label matchNameLab;
+    Label matchBuildingLab;
+    Label matchOfficeLab;
     
     Mat graylImageMat;
     private Image graylImage;
@@ -178,7 +186,31 @@ public class KeyOperations extends BorderPane {
     }
 
     private void createUIbottomPanel() {
-        this.setBottom(null);
+        this.setBottom(GenerateBottomPanel());
+    }
+    
+    private VBox GenerateBottomPanel()
+    {
+        GridPane gp = new GridPane();
+        VBox vb = new VBox();
+        VBox pVb = new VBox();
+        
+        matched = new ImageView();
+        matchImgV = new ImageView();
+        matchNameLab = new Label();
+        matchBuildingLab = new Label();
+        matchOfficeLab = new Label();
+        
+        pVb.setAlignment(Pos.CENTER);
+        vb.setAlignment(Pos.CENTER);
+        vb.getChildren().addAll(matchNameLab, matchBuildingLab, matchOfficeLab);
+        
+        gp.add(matchImgV, 0, 0);
+        gp.add(vb, 1, 0);
+        
+        pVb.getChildren().addAll(matched, gp);
+        
+        return pVb;
     }
 
     private VBox generateCenterPanel() {
@@ -544,8 +576,16 @@ public class KeyOperations extends BorderPane {
                     shortestDistance = currDistance;
                 }
             }
-
-            System.out.println(closestQueryObj.getName());
+            
+            try {
+                matched.setImage(new Image(new FileInputStream(System.getProperty("user.dir")+"/files/match.jpg")));
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(KeyOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            matchImgV.setImage(ImageIoFX.setGrayByteImageArray1DToFXImage(closestQueryObj.getImage(), 311, 162));
+            matchNameLab.setText("Database Key Name: "+closestQueryObj.getName());
+            matchBuildingLab.setText("Database Key Building: "+closestQueryObj.getBuilding());
+            matchOfficeLab.setText("Database Key Office: "+closestQueryObj.getOffice());
         }
     
     }
