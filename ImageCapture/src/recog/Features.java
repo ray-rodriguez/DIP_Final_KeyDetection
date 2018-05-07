@@ -5,6 +5,8 @@
  */
 package recog;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author xwc981

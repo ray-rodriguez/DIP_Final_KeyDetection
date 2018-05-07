@@ -25,7 +25,7 @@ public class DipTabs {
     private Image img01 = new Image("images/camera.gif");
     private Image img02 = new Image("images/camera2.png");
 
-    public DipTabs(FrameGrabber frameGrabber)
+    public DipTabs(FrameGrabber frameGrabber) 
     {
         // Color
         tabsPane.setStyle("-fx-background-color: cornsilk;");

@@ -5,6 +5,7 @@
  */
 package recog;
 
+import DatabaseManagement.DBQueryObject;
 import DatabaseManagement.DatabaseCommunication;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -82,6 +83,7 @@ public class KeyOperations extends BorderPane {
     TextField nameField;
     TextField buildingField;
     TextField officeField;
+    TextField nameToUpdateField;
     
     Mat graylImageMat;
     private Image graylImage;
@@ -112,10 +114,9 @@ public class KeyOperations extends BorderPane {
     private final ImageView processedimageview = new ImageView();;
     
     byte[][] currentImageBytes;
-    public KeyOperations(TabPane tabsPane) throws SQLException
+    public KeyOperations(TabPane tabsPane)
     {
         this.tabsPane = tabsPane; 
-        dbCom.DBConnect();
         
         // everytime the tab is selected, check the databases for changes        
         tabsPane.getSelectionModel().selectedItemProperty().addListener(
@@ -261,9 +262,18 @@ public class KeyOperations extends BorderPane {
         Label officeFieldLab = new Label("Key's Office: ");
         officeField = new TextField();
         
+        Separator separator = new Separator();
+        separator.setMinSize(40, 40);
+        separator.setOrientation(Orientation.VERTICAL);
+        
+        Label nameToUpdateLab = new Label("Name to Update features: ");
+        nameToUpdateField = new TextField();
+        Button updateFeaturesButton = new Button("Update Feature...");
+        updateFeaturesButton.setOnAction(new Operation9Handler());
+        
          // Final layout
         VBox vb = new VBox(10);
-        vb.getChildren().addAll(nameFieldLab, nameField, buildingFieldLab, buildingField, officeFieldLab, officeField, updateDBButton);
+        vb.getChildren().addAll(nameFieldLab, nameField, buildingFieldLab, buildingField, officeFieldLab, officeField, updateDBButton, separator, nameToUpdateLab, nameToUpdateField, updateFeaturesButton);
 
         updateDBBox.getChildren().addAll(vb);
         return updateDBBox;
@@ -307,7 +317,7 @@ public class KeyOperations extends BorderPane {
         Button reconstructKeyButton = new Button("Reconstruct-OpenCV");
         reconstructKeyButton.setMaxWidth(Double.MAX_VALUE);
         reconstructKeyButton.setOnAction(new Operation7Handler());
-        reconstructSlider.setValue(0);
+        reconstructSlider.setValue(512);
         reconstructSlider.setShowTickLabels(true);
         reconstructSlider.setShowTickMarks(true);
         reconstructSlider.setMajorTickUnit(128);
@@ -315,19 +325,23 @@ public class KeyOperations extends BorderPane {
         reconstructSlider.setBlockIncrement(4);
         
         //Compare Button
-        Button compareKeyButton = new Button("Get Features & Compare...");
-        compareKeyButton.setMaxWidth(Double.MAX_VALUE);
-        compareKeyButton.setOnAction(new Operation6Handler());
-        featureSlider.setValue(0);
+        Button getFeaturesButton = new Button("Get Features..");
+        getFeaturesButton.setMaxWidth(Double.MAX_VALUE);
+        getFeaturesButton.setOnAction(new Operation6Handler());
+        featureSlider.setValue(512);
         featureSlider.setShowTickLabels(true);
         featureSlider.setShowTickMarks(true);
         featureSlider.setMajorTickUnit(128);
         featureSlider.setMinorTickCount(16);
         featureSlider.setBlockIncrement(4);
+        
+        Button compareButton = new Button("Compare...");
+        compareButton.setMaxWidth(Double.MAX_VALUE);
+        compareButton.setOnAction(new Operation10Handler());
 
         // Final layout
         VBox vb = new VBox(10);
-        vb.getChildren().addAll(selectKeyButton, grayKeyButton, NegateButton, binarySlider, binarizeKeyButton, processKeyButton, reconstructSlider, reconstructKeyButton, featureSlider, compareKeyButton);
+        vb.getChildren().addAll(selectKeyButton, grayKeyButton, NegateButton, binarySlider, binarizeKeyButton, processKeyButton, reconstructSlider, reconstructKeyButton, featureSlider, getFeaturesButton, compareButton);
 
         dipOperations.getChildren().addAll(vb);
         return dipOperations;
@@ -459,10 +473,16 @@ public class KeyOperations extends BorderPane {
             
             //Graph the FDs... they are tiny in mgd?! first is always one (you can remove it if you want to).
             fdGraph = fdGraph.graphFD(features, value);
-            
-            //Compare image with database...
-            
         }
+    }
+    
+    public double GetDistance(double[] a, double[] b)
+    {
+        double accum = 0;
+        for (int i = 0; i < a.length; i++) {
+            accum += (a[i]-b[i])*(a[i]-b[i]);
+        }
+        return Math.sqrt(accum);
     }
     
     class Operation7Handler implements EventHandler<ActionEvent> {
@@ -486,11 +506,46 @@ public class KeyOperations extends BorderPane {
             String building = buildingField.getText();
             String office = officeField.getText();
             
-            try {
-                dbCom.DBAddRecord(name, building, office, features, originalImageByteData);
-            } catch (SQLException ex) {
-                Logger.getLogger(KeyOperations.class.getName()).log(Level.SEVERE, null, ex);
+        
+            dbCom.DBAddRecord(name, building, office, features, originalImageByteData);
+            
+        }
+    
+    }
+    
+    class Operation9Handler implements EventHandler<ActionEvent> 
+    {
+        @Override
+        public void handle(ActionEvent event) 
+        {
+            String name = nameToUpdateField.getText();
+           
+            dbCom.UpdateRecordFeatureVector(name, features);
+        }
+    
+    }
+    
+    class Operation10Handler implements EventHandler<ActionEvent> 
+    {
+        @Override
+        public void handle(ActionEvent event) 
+        {
+            //Compare image with database...
+            DBQueryObject closestQueryObj = null;
+            DBQueryObject[] queryObjs = dbCom.DBQueryDatabase();
+
+            double shortestDistance = Float.MAX_VALUE;
+            for (int i = 0; i < queryObjs.length; i++) {
+                double[] inFeatures = queryObjs[i].getFeatures();
+                double currDistance = GetDistance(features, inFeatures);
+                if (shortestDistance > currDistance)
+                {
+                    closestQueryObj = queryObjs[i];
+                    shortestDistance = currDistance;
+                }
             }
+
+            System.out.println(closestQueryObj.getName());
         }
     
     }
