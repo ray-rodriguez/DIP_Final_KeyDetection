@@ -22,9 +22,7 @@ import java.sql.SQLException;
  */
 public class DIP_FaceRecog_JavaFXMainApp extends Application {
     @Override
-    public void start(Stage primaryStage) throws SQLException{ 
-        DatabaseCommunication dbCom = new DatabaseCommunication();
-        dbCom.DBConnect();
+    public void start(Stage primaryStage) throws SQLException{
         // Initialize the Camera/Opencv Lib
         System.loadLibrary("opencv_java341");
         FrameGrabber frameGrabber = new FrameGrabber();

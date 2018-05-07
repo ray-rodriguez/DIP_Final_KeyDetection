@@ -5,8 +5,12 @@
  */
 package recog;
 
+import DatabaseManagement.DatabaseCommunication;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
@@ -35,6 +39,7 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
@@ -57,6 +62,7 @@ import utilities.ImageIoFX;
 //BackgroundSize.DEFAULT);
 //label1.setBackground(new Background(myBI));
 public class KeyOperations extends BorderPane {
+    DatabaseCommunication dbCom = new DatabaseCommunication();
 
     //Frame Grabber from OpenCV
     private TabPane tabsPane;
@@ -69,6 +75,13 @@ public class KeyOperations extends BorderPane {
     private Image originalImage;
     private ImageView originalImageview;
     private BufferedImage originalBufferedimage;
+    
+    private byte[] originalImageByteData;
+    double[] features;
+    
+    TextField nameField;
+    TextField buildingField;
+    TextField officeField;
     
     Mat graylImageMat;
     private Image graylImage;
@@ -99,9 +112,10 @@ public class KeyOperations extends BorderPane {
     private final ImageView processedimageview = new ImageView();;
     
     byte[][] currentImageBytes;
-    public KeyOperations(TabPane tabsPane) 
+    public KeyOperations(TabPane tabsPane) throws SQLException
     {
-        this.tabsPane = tabsPane;  
+        this.tabsPane = tabsPane; 
+        dbCom.DBConnect();
         
         // everytime the tab is selected, check the databases for changes        
         tabsPane.getSelectionModel().selectedItemProperty().addListener(
@@ -139,6 +153,7 @@ public class KeyOperations extends BorderPane {
     public void getGUI() {
         createUItopPanel();
         createUIleftPanel();
+        createUIRightPanel();
         createUIcenterPanel();
         createUIbottomPanel();
     }
@@ -150,6 +165,11 @@ public class KeyOperations extends BorderPane {
     private void createUIleftPanel() {
         //get current operations
         this.setLeft(getCameraOperations());
+    }
+    
+    private void createUIRightPanel()
+    {
+        this.setRight(AddToDatabase());
     }
 
     private void createUIcenterPanel() {
@@ -220,6 +240,33 @@ public class KeyOperations extends BorderPane {
         vb.getChildren().addAll(label1, separator1);
         BorderPane.setAlignment(vb, Pos.CENTER);
         return vb;
+    }
+    
+    public VBox AddToDatabase()
+    {
+        VBox updateDBBox = new VBox(10);
+        
+        //update database button
+        Button updateDBButton = new Button("Add to Database");
+        updateDBButton.setMaxWidth(Double.MAX_VALUE);
+        updateDBButton.setOnAction(new Operation8Handler());
+        
+        //text fields to enter name, building, and office
+        Label nameFieldLab = new Label("Key's name: ");
+        nameField = new TextField();
+        
+        Label buildingFieldLab = new Label("Key's Building: ");
+        buildingField = new TextField();
+        
+        Label officeFieldLab = new Label("Key's Office: ");
+        officeField = new TextField();
+        
+         // Final layout
+        VBox vb = new VBox(10);
+        vb.getChildren().addAll(nameFieldLab, nameField, buildingFieldLab, buildingField, officeFieldLab, officeField, updateDBButton);
+
+        updateDBBox.getChildren().addAll(vb);
+        return updateDBBox;
     }
 
     public VBox getCameraOperations() {
@@ -332,12 +379,14 @@ public class KeyOperations extends BorderPane {
     class Operation1Handler implements EventHandler<ActionEvent> {
 
         final FileChooser fileChooser = new FileChooser();
+        File workingDirectory = new File(System.getProperty("user.dir"));
         @Override
         public void handle(ActionEvent event) {
             //Clear current stuff
             processedimageview.setImage(null);
 
             // load an image....
+            fileChooser.setInitialDirectory(workingDirectory);
             File file = fileChooser.showOpenDialog(null);
             FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("Image files", "*.JPG", "*.PNG");
             fileChooser.getExtensionFilters().addAll(extFilterJPG);
@@ -381,7 +430,7 @@ public class KeyOperations extends BorderPane {
             
             // OpenCV Stuff... Mat in and Mat out
             binarylImageMat = OpenCVProcessor.doThreshold(graylImageMat,value);
-            Image resultImg = FXDIPUtils.mat2Image(binarylImageMat); 
+            Image resultImg = FXDIPUtils.mat2Image(binarylImageMat);
             binarylImageView.setImage(resultImg);
         }        
     }
@@ -392,6 +441,7 @@ public class KeyOperations extends BorderPane {
             // Convert to Gray
             BufferedImage bufferedImage2 = ImageIoFX.toGray(originalBufferedimage);
             currentImageBytes = ImageIoFX.getGrayByteImageArray2DFromBufferedImage(bufferedImage2);
+            originalImageByteData = ImageIoFX.getGrayByteImageArray1DFromBufferedImage(bufferedImage2);
             graylImageMat =  FXDIPUtils.byteToGrayMat(currentImageBytes, CV_8UC1); 
 
             Image graylImage = FXDIPUtils.mat2Image(graylImageMat); 
@@ -405,7 +455,7 @@ public class KeyOperations extends BorderPane {
             int value = (int) featureSlider.getValue();
             
             // Extract Features
-            double[] features = OpenCVProcessor.doFDDescriptorsComplexDistance(binarylImageMat,value);
+            features = OpenCVProcessor.doFDDescriptorsComplexDistance(binarylImageMat,value);
             
             //Graph the FDs... they are tiny in mgd?! first is always one (you can remove it if you want to).
             fdGraph = fdGraph.graphFD(features, value);
@@ -425,5 +475,23 @@ public class KeyOperations extends BorderPane {
             Image currentReconstructedimage = FXDIPUtils.mat2Image(currentReconstructedMat); 
             currentReconstructedimageview.setImage(currentReconstructedimage);
         }
+    }
+    
+    class Operation8Handler implements EventHandler<ActionEvent> 
+    {
+        @Override
+        public void handle(ActionEvent event) 
+        {
+            String name = nameField.getText();
+            String building = buildingField.getText();
+            String office = officeField.getText();
+            
+            try {
+                dbCom.DBAddRecord(name, building, office, features, originalImageByteData);
+            } catch (SQLException ex) {
+                Logger.getLogger(KeyOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    
     }
 }

@@ -3,28 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/camera/CameraPane.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/main/DIP_FaceRecog_JavaFXMainApp.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/utilities/FXDIPUtils.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/recog/KeyOperations.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/defaultcaptureImage.jpg</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/utilities/ImageIoFX.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/camera/FrameGrabber.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/utb.jpg</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/fourierdescriptors/FFT.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/defaultLiveImage.jpg</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/fourierdescriptors/Complex.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/vaq_1.png</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/recog/KeyProperties.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/opencv/OpenCVProcessor.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/camera2.png</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/recog/Features.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/recog/KeyInformation.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/mainGui/GUI.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/vaq.png</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/images/camera.gif</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/mainGui/DipTabs.java</file>
-            <file>file:/F:/Gateway/Courses/Computer%20Science/DIP%20and%20Vision%20and%20Matlab/Image%20Processing/DigitalImageProcessing-after%202013/Java%20Projects/ImageCapture/src/recog/Database.java</file>
+            <file>file:/C:/Users/Ray-GRod/Documents/repos/ImageCapture/src/recog/KeyOperations.java</file>
         </group>
     </open-files>
 </project-private>
